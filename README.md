@@ -52,5 +52,5 @@ Lien vers les données : [Accéder aux données](https://upvdrive.univ-montp3.fr
 1. **Cloner le dépôt :**
 
    ```bash
-   git clone https://github.com/votre-utilisateur/le-futur-de-l-actu-en-bref.git
+   git clone https://github.com/LightAkabane/le-futur-de-l-actu-en-bref.git
    cd le-futur-de-l-actu-en-bref
