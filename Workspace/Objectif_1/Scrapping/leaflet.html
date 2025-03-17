@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carte des Entités avec DBpedia</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        #map { height: 600px; width: 100%; }
+        #filter-container { margin: 10px; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <div id="filter-container">
+        <label><input type="radio" name="filter" value="all" checked> Tous</label>
+        <label><input type="radio" name="filter" value="loc"> Lieux (LOC)</label>
+        <label><input type="radio" name="filter" value="org"> Organisations (ORG)</label>
+    </div>
+
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+        var map = L.map('map').setView([20, 0], 2);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        var markers = [];
+
+        // 📌 Fonction pour récupérer les coordonnées via DBpedia SPARQL
+        function fetchCoordinatesFromDBpedia(entity, callback) {
+            var sparqlQuery = `
+                SELECT ?place ?lat ?long WHERE {
+                    ?place a dbo:Place;
+                           rdfs:label ?label;
+                           geo:lat ?lat;
+                           geo:long ?long.
+                    FILTER (lang(?label) = "fr" || lang(?label) = "en")
+                    FILTER (STR(?label) = "${entity}" || STR(?label) = "${entity}, France")
+                }
+                LIMIT 1`;
+            
+            var url = "https://dbpedia.org/sparql?query=" + encodeURIComponent(sparqlQuery) + "&format=json";
+            
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.results.bindings.length > 0) {
+                        var lat = parseFloat(data.results.bindings[0].lat.value);
+                        var lon = parseFloat(data.results.bindings[0].long.value);
+                        callback(entity, lat, lon);
+                    } else {
+                        console.log("❌ Aucune coordonnée trouvée pour :", entity);
+                    }
+                })
+                .catch(error => console.error("⚠️ Erreur DBpedia :", error));
+        }
+
+        // 📌 Charger les données depuis entities.json
+        fetch('entities.json')
+            .then(response => response.json())
+            .then(data => {
+                data.forEach(entity => {
+                    if (entity.entity_type === "LOC" || entity.entity_type === "ORG") {
+                        if (entity.Latitude && entity.Longitude) {
+                            addMarker(entity.entity, entity.Latitude, entity.Longitude, entity.entity_type);
+                        } else {
+                            fetchCoordinatesFromDBpedia(entity.entity, (name, lat, lon) => {
+                                entity.Latitude = lat;
+                                entity.Longitude = lon;
+                                addMarker(name, lat, lon, entity.entity_type);
+                            });
+                        }
+                    }
+                });
+            });
+
+        // 📌 Ajouter un marqueur sur la carte
+        function addMarker(name, lat, lon, type) {
+            var color = type === "LOC" ? "red" : "blue";
+            var marker = L.marker([lat, lon], {
+                icon: L.divIcon({
+                    className: 'custom-icon',
+                    html: `<div style="background-color:${color};width:10px;height:10px;border-radius:50%;"></div>`,
+                    iconSize: [10, 10]
+                })
+            });
+
+            marker.entityType = type;
+            marker.bindPopup(`<b>${name}</b><br>Type: ${type}<br>Latitude: ${lat}<br>Longitude: ${lon}`);
+            marker.on('mouseover', function () { this.openPopup(); });
+            marker.on('mouseout', function () { this.closePopup(); });
+
+            markers.push(marker);
+            marker.addTo(map);
+        }
+
+        // 📌 Fonction de filtrage des entités affichées
+        function filterMarkers(type) {
+            markers.forEach(marker => {
+                if (type === "all" || marker.entityType === type.toUpperCase()) {
+                    map.addLayer(marker);
+                } else {
+                    map.removeLayer(marker);
+                }
+            });
+        }
+
+        // 📌 Ajout d'écouteurs sur les boutons radio pour filtrer
+        document.querySelectorAll('input[name="filter"]').forEach(input => {
+            input.addEventListener('change', function() {
+                filterMarkers(this.value);
+            });
+        });
+    </script>
+
+</body>
+</html>

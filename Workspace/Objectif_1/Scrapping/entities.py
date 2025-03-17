@@ -109,6 +109,8 @@ def extract_named_entities_from_json(json_path, stopwords_path, num_workers=4):
     return df
 
 
+
+
 # Définition des chemins des fichiers
 json_path = "clean_articles.json"  # Remplace par le bon fichier
 stopwords_path = "stopwords-fr.txt"
