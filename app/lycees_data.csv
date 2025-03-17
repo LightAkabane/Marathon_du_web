@@ -1,0 +1,8 @@
+user_id,lycee_name,latitude,longitude,profile_type,usage_purpose,articles_visited,page_views,session_duration,timestamp
+U1,Lycee Henri IV,48.8464,2.3456,Environnement,actualité,"climat,ecologie,développement durable",12,300,2025-03-01 10:15:00
+U2,Lycee Henri IV,48.8464,2.3456,Environnement,documentation,"developpement durable,energies vertes",8,200,2025-03-01 11:00:00
+U3,Lycee Jean Moulin,43.7034,7.2663,Politique,actualité,"politique,legislatives,vote",15,450,2025-03-02 09:45:00
+U4,Lycee Jean Moulin,43.7034,7.2663,Politique,documentation,"institutions,assemblée nationale",6,180,2025-03-02 10:10:00
+U5,Lycee International,45.7578,4.8320,Scientifique,documentation,"espace,physique quantique,astronomie",10,250,2025-03-03 14:30:00
+U6,Lycee International,45.7578,4.8320,Scientifique,actualité,"satellite,astronomie,exploration spatiale",9,225,2025-03-03 14:40:00
+U7,Lycee Montesquieu,44.8378,-0.5792,Environnement,actualité,"biodiversité,faune,forets",20,600,2025-03-04 08:20:00

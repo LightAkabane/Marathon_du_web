@@ -1,0 +1,272 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block content %}
+
+
+<!-- Sidebar toujours visible -->
+<div class="filters-sidebar" id="filtersSidebar">
+    <div class="filters-header">
+        <h2>Filtres</h2>
+    </div>
+    
+    <!-- Groupe de filtre pour les Lycées -->
+    <div class="filter-group">
+        <label class="filter-label">Lycées</label>
+        <!-- Champ de recherche pour les lycées -->
+        <input type="text" id="lyceeSearch" class="filter-search" placeholder="Rechercher un lycée...">
+        <div class="checkbox-group" id="lyceeCheckboxes">
+            <label class="checkbox-label">
+                <input type="checkbox" name="lycee" value="Lycee Henri IV" checked>
+                Lycée Henri IV
+            </label>
+            <label class="checkbox-label">
+                <input type="checkbox" name="lycee" value="Lycee Jean Moulin" checked>
+                Lycée Jean Moulin
+            </label>
+            <label class="checkbox-label">
+                <input type="checkbox" name="lycee" value="Lycee International" checked>
+                Lycée International
+            </label>
+            <label class="checkbox-label">
+                <input type="checkbox" name="lycee" value="Lycee Montesquieu" checked>
+                Lycée Montesquieu
+            </label>
+            <!-- Ajoutez d'autres cases si nécessaire -->
+        </div>
+    </div>
+    
+    <!-- Groupe de filtre pour les Types de Profil -->
+    <div class="filter-group">
+        <label class="filter-label">Types de Profil</label>
+        <!-- Champ de recherche pour les types de profil -->
+        <input type="text" id="profileSearch" class="filter-search" placeholder="Rechercher un type...">
+        <div class="checkbox-group" id="profileCheckboxes">
+            <label class="checkbox-label">
+                <input type="checkbox" name="profile" value="Environnement" checked>
+                Environnement
+            </label>
+            <label class="checkbox-label">
+                <input type="checkbox" name="profile" value="Politique" checked>
+                Politique
+            </label>
+            <label class="checkbox-label">
+                <input type="checkbox" name="profile" value="Scientifique" checked>
+                Scientifique
+            </label>
+            <!-- Ajoutez d'autres cases si nécessaire -->
+        </div>
+    </div>
+    
+    <!-- Groupe de filtre pour les Plages Horaires -->
+    <div class="filter-group">
+        <label class="filter-label">Plage Horaire</label>
+        <div class="checkbox-group" id="timeRangeCheckboxes">
+            <label class="checkbox-label">
+                <input type="checkbox" name="timeRange" value="8-12" checked>
+                8h-12h
+            </label>
+            <label class="checkbox-label">
+                <input type="checkbox" name="timeRange" value="12-14" checked>
+                12h-14h
+            </label>
+            <label class="checkbox-label">
+                <input type="checkbox" name="timeRange" value="14-18" checked>
+                14h-18h
+            </label>
+            <label class="checkbox-label">
+                <input type="checkbox" name="timeRange" value="18-23" checked>
+                18h-23h
+            </label>
+        </div>
+    </div>
+    <button id="resetSelection">Afficher toutes les données</button>
+
+</div>
+
+  
+
+
+
+<!-- Zone de graphique principale (Dashboard) -->
+<div class="chart-area">
+
+    <!-- Première ligne : Map + Camembert -->
+    <div class="chart-row first-row" id="firstRow">
+        <div class="chart-card heatmap-card">
+            <div class="chart-header">
+                <h3 class="chart-title">Carte des lycées selectionées </h3>
+                <div class="chart-options">
+                    <button class="option-btn" onclick="toggleFullscreen(this)">⤢</button>
+                    <button class="option-btn" onclick="exportChart(this)">↓</button>
+                </div>
+            </div>
+            <!-- Canvas pour la Map -->
+            <div id="heatmapChart" style="height: 400px;"></div>
+        </div>
+
+        <!-- Colonne de droite : deux cartes empilées -->
+        
+        <!-- Nouveau conteneur pour le camembert ECharts -->
+    <div class="chart-card" style="flex: 0 0 calc(50% - 0.5rem);">
+        <div class="chart-header">
+            <h3 class="chart-title">Répartition des profils</h3>
+            <div class="chart-options">
+                <button class="option-btn" onclick="toggleFullscreen(this)">⤢</button>
+                <button class="option-btn" onclick="exportChart(this)">↓</button>
+                
+            </div>
+        </div>
+        <!-- Conteneur pour le camembert -->
+        <div id="echartPie" style="height: 400px;"></div>
+        
+    </div>
+        
+
+        
+    </div>
+
+    <!-- Troisième ligne : nuage de point + camenbert -->
+    <div class="chart-row third-row" id="thirdRow">
+        <!-- Trois conteneurs pour les nuages de mots -->
+        <div class="chart-card" id="wordCloud1" style="flex: 1; height: 300px; position: relative;">
+            <div class="chart-options">
+                <button class="option-btn" onclick="toggleFullscreen(this)">⤢</button>
+                <button class="option-btn" onclick="exportChart(this)">↓</button>
+            </div>
+            <h3 class="chart-title">Nuage de Mots</h3>
+            <!-- Conteneur réservé au word cloud -->
+            <div id="wordCloud1Content" style="height: calc(100% - 2.5rem);">
+                <!-- Le nuage de mots sera rendu ici -->
+            </div>
+        </div>
+
+        <div class="chart-card" id="wordCloud2" style="flex: 1; height: 300px; position: relative;">
+            <div class="chart-options">
+                <button class="option-btn" onclick="toggleFullscreen(this)">⤢</button>
+                <button class="option-btn" onclick="exportChart(this)">↓</button>
+            </div>
+            <h3 class="chart-title">Nuage de Mots 2</h3>
+            <!-- Conteneur réservé au word cloud -->
+            <div id="wordCloud2Content" style="height: calc(100% - 2.5rem);">
+                <!-- Le nuage de mots sera rendu ici -->
+            </div>
+        </div>
+
+        <div class="chart-card" id="wordCloud3" style="flex: 1; height: 300px; position: relative;">
+            <div class="chart-options">
+                <button class="option-btn" onclick="toggleFullscreen(this)">⤢</button>
+                <button class="option-btn" onclick="exportChart(this)">↓</button>
+            </div>
+            <h3 class="chart-title">Nuage de Mots 3</h3>
+            <!-- Conteneur réservé au word cloud -->
+            <div id="wordCloud3Content" style="height: calc(100% - 2.5rem);">
+                <!-- Le nuage de mots sera rendu ici -->
+            </div>
+        </div>
+
+    
+        <!-- Conteneur pour le radar chart -->
+        <div class="chart-card" id="radarChartContainer" style="flex: 1; height: 300px; position: relative;">
+            <div class="chart-options">
+                <button class="option-btn" onclick="toggleFullscreen(this)">⤢</button>
+                <button class="option-btn" onclick="exportChart(this)">↓</button>
+            </div>
+            <div id="radarChart" style="height: 100%;"></div>
+        </div>
+        
+    </div>
+    
+
+    <!-- Dernière partie : Tableau des données du CSV -->
+    <div class="data-table-container" id="dataTableContainer">
+        <h3>Tableau des données importées</h3>
+        <table id="dataTable">
+            <thead>
+                <tr>
+                    <th>User_id</th>
+                    <th>Lycee_name</th>
+                    <th>Latitude</th>
+                    <th>Longitude </th>
+                    <th>Profile_type</th>
+                    <th>Usage_purpose </th>
+                    <th> Articles_visited</th>
+                    <th>Page_views </th>
+                    <th>Session_duration </th>
+                    <th>Timestamp </th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in lycees %}
+                    <tr>
+                        <td>{{ row.user_id }}</td>
+                        <td>{{ row.lycee_name }}</td>
+                        <td>{{ row.latitude }}</td>
+                        <td>{{ row.longitude }}</td>
+                        <td>{{ row.profile_type }}</td>
+                        <td>{{ row.usage_purpose }}</td>
+                        <td>{{ row.articles_visited }}</td>
+                        <td>{{ row.page_views }}</td>
+                        <td>{{ row.session_duration }}</td>
+                        <td>{{ row.timestamp }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+        </table>
+    </div>
+
+</div>
+
+<!-- Scripts spécifiques à la page -->
+<script src="{% static 'js/wordcloud2.js' %}"></script>
+<script src="{% static 'js/interactivity.js' %}"></script>
+<script src="{% static 'js/charts.js' %}"></script>
+
+<script>
+    // Récupération du JSON généré par Django
+    const lyceesData = JSON.parse('{{ lycees_json|safe }}');
+    console.log("lyceesData:", lyceesData); // Pour vérifier dans la console
+    // lyceesData est désormais un tableau d'objets JS
+</script>
+
+
+<!-- Script pour gérer la recherche et le toggle du panneau -->
+<script>
+    function filterLycees() {
+        const input = document.getElementById('lyceeSearchInput');
+        const filterValue = input.value.toLowerCase();
+        const lyceeList = document.getElementById('lyceeList');
+        const labels = lyceeList.querySelectorAll('label');
+
+        labels.forEach(label => {
+            const text = label.textContent.toLowerCase();
+            // Affiche le label seulement s’il contient le texte cherché
+            if (text.includes(filterValue)) {
+                label.style.display = 'block';
+            } else {
+                label.style.display = 'none';
+            }
+        });
+    }
+
+    function toggleFiltersPanel() {
+        const sidebar = document.getElementById('filtersSidebar');
+        sidebar.classList.toggle('open'); 
+    }
+
+    document.querySelectorAll('.nav-button').forEach(button => {
+    button.addEventListener('click', function() {
+        const targetId = this.getAttribute('data-target');
+        const targetElement = document.getElementById(targetId);
+        if (targetElement) {
+            targetElement.scrollIntoView({ behavior: 'smooth' });
+        }
+    });
+});
+
+</script>
+
+
+
+
+{% endblock %}
